@@ -106,6 +106,8 @@ int cam_soc_util_irq_enable(struct cam_hw_soc_info *soc_info)
 		return -ENODEV;
 	}
 
+	CAMSS_DEBUG("%s, %llx", soc_info->irq_name, soc_info->irq_line->start);
+
 	enable_irq(soc_info->irq_line->start);
 
 	return 0;
@@ -122,6 +124,8 @@ int cam_soc_util_irq_disable(struct cam_hw_soc_info *soc_info)
 		CAM_ERR(CAM_UTIL, "No IRQ line available");
 		return -ENODEV;
 	}
+
+	CAMSS_DEBUG("%s, %llx", soc_info->irq_name, soc_info->irq_line->start);
 
 	disable_irq(soc_info->irq_line->start);
 
@@ -160,6 +164,8 @@ int cam_soc_util_set_clk_rate(struct clk *clk, const char *clk_name,
 
 	if (!clk || !clk_name)
 		return -EINVAL;
+
+	CAMSS_DEBUG("%s, rate - %lld", clk_name, clk_rate);
 
 	CAM_DBG(CAM_UTIL, "set %s, rate %d", clk_name, clk_rate);
 	if (clk_rate > 0) {
@@ -290,6 +296,8 @@ int cam_soc_util_clk_enable(struct clk *clk, const char *clk_name,
 	if (!clk || !clk_name)
 		return -EINVAL;
 
+	CAMSS_DEBUG("%s", clk_name);
+
 	rc = cam_soc_util_set_clk_rate(clk, clk_name, clk_rate);
 	if (rc)
 		return rc;
@@ -309,6 +317,7 @@ int cam_soc_util_clk_disable(struct clk *clk, const char *clk_name)
 		return -EINVAL;
 
 	CAM_DBG(CAM_UTIL, "disable %s", clk_name);
+	CAMSS_DEBUG("%s", clk_name);
 	clk_disable_unprepare(clk);
 
 	return 0;
@@ -962,6 +971,8 @@ int cam_soc_util_regulator_disable(struct regulator *rgltr,
 		return -EINVAL;
 	}
 
+	CAMSS_DEBUG("%s", rgltr_name);
+
 	rc = regulator_disable(rgltr);
 	if (rc) {
 		CAM_ERR(CAM_UTIL, "%s regulator disable failed", rgltr_name);
@@ -994,6 +1005,8 @@ int cam_soc_util_regulator_enable(struct regulator *rgltr,
 		CAM_ERR(CAM_UTIL, "Invalid NULL parameter");
 		return -EINVAL;
 	}
+
+	CAMSS_DEBUG("regulator_enable: %s", rgltr_name);
 
 	if (regulator_count_voltages(rgltr) > 0) {
 		CAM_DBG(CAM_UTIL, "voltage min=%d, max=%d",
@@ -1077,6 +1090,7 @@ static void cam_soc_util_regulator_disable_default(
 				soc_info->rgltr_op_mode[j],
 				soc_info->rgltr_delay[j]);
 		} else {
+			CAMSS_DEBUG("regulator_disable: %s", soc_info->rgltr_name[j]);
 			if (soc_info->rgltr[j])
 				regulator_disable(soc_info->rgltr[j]);
 		}
@@ -1098,6 +1112,7 @@ static int cam_soc_util_regulator_enable_default(
 				soc_info->rgltr_op_mode[j],
 				soc_info->rgltr_delay[j]);
 		} else {
+			CAMSS_DEBUG("regulator_enable: %s", soc_info->rgltr_name[j]);
 			if (soc_info->rgltr[j])
 				rc = regulator_enable(soc_info->rgltr[j]);
 		}
@@ -1121,6 +1136,7 @@ disable_rgltr:
 				soc_info->rgltr_op_mode[j],
 				soc_info->rgltr_delay[j]);
 		} else {
+			CAMSS_DEBUG("regulator_disable: %s", soc_info->rgltr_name[j]);
 			if (soc_info->rgltr[j])
 				regulator_disable(soc_info->rgltr[j]);
 		}
@@ -1238,6 +1254,7 @@ put_regulator:
 		i = soc_info->num_rgltr;
 	for (i = i - 1; i >= 0; i--) {
 		if (soc_info->rgltr[i]) {
+			CAMSS_DEBUG("regulator_disable: %s", soc_info->rgltr_name[i]);
 			regulator_disable(soc_info->rgltr[i]);
 			regulator_put(soc_info->rgltr[i]);
 			soc_info->rgltr[i] = NULL;
@@ -1262,6 +1279,8 @@ unmap_base:
 int cam_soc_util_release_platform_resource(struct cam_hw_soc_info *soc_info)
 {
 	int i;
+
+	CAMSS_DEBUG();
 
 	if (!soc_info || !soc_info->dev) {
 		CAM_ERR(CAM_UTIL, "Invalid parameter");
