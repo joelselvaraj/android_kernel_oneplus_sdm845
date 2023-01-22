@@ -37,6 +37,8 @@ static int cam_ife_csid_request_platform_resource(
 {
 	int rc = 0;
 
+	CAMSS_DEBUG();
+
 	rc = cam_soc_util_request_platform_resource(soc_info, csid_irq_handler,
 		irq_data);
 	if (rc)
@@ -51,6 +53,8 @@ int cam_ife_csid_init_soc_resources(struct cam_hw_soc_info *soc_info,
 	int rc = 0;
 	struct cam_cpas_register_params   cpas_register_param;
 	struct cam_csid_soc_private      *soc_private;
+
+	CAMSS_DEBUG();
 
 	soc_private = kzalloc(sizeof(struct cam_csid_soc_private), GFP_KERNEL);
 	if (!soc_private)
@@ -101,6 +105,8 @@ int cam_ife_csid_deinit_soc_resources(
 	int rc = 0;
 	struct cam_csid_soc_private       *soc_private;
 
+	CAMSS_DEBUG();
+
 	soc_private = soc_info->soc_private;
 	if (!soc_private) {
 		CAM_ERR(CAM_ISP, "Error soc_private NULL");
@@ -124,6 +130,8 @@ int cam_ife_csid_enable_soc_resources(struct cam_hw_soc_info *soc_info)
 	struct cam_csid_soc_private       *soc_private;
 	struct cam_ahb_vote ahb_vote;
 	struct cam_axi_vote axi_vote;
+
+	CAMSS_DEBUG();
 
 	soc_private = soc_info->soc_private;
 
@@ -162,6 +170,8 @@ int cam_ife_csid_disable_soc_resources(struct cam_hw_soc_info *soc_info)
 	int rc = 0;
 	struct cam_csid_soc_private       *soc_private;
 
+	CAMSS_DEBUG();
+
 	if (!soc_info) {
 		CAM_ERR(CAM_ISP, "Error Invalid params");
 		return -EINVAL;
@@ -187,6 +197,8 @@ int cam_ife_csid_enable_ife_force_clock_on(struct cam_hw_soc_info  *soc_info,
 	int rc = 0;
 	struct cam_csid_soc_private       *soc_private;
 	uint32_t                           cpass_ife_force_clk_offset;
+
+	CAMSS_DEBUG();
 
 	if (!soc_info) {
 		CAM_ERR(CAM_ISP, "Error Invalid params");
@@ -215,6 +227,8 @@ int cam_ife_csid_disable_ife_force_clock_on(struct cam_hw_soc_info *soc_info,
 	int rc = 0;
 	struct cam_csid_soc_private       *soc_private;
 	uint32_t                           cpass_ife_force_clk_offset;
+
+	CAMSS_DEBUG();
 
 	if (!soc_info) {
 		CAM_ERR(CAM_ISP, "Error Invalid params");
