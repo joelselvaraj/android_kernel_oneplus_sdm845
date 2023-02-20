@@ -767,7 +767,7 @@ int cam_vfe_process_cmd(void *hw_priv, uint32_t cmd_type,
 	case CAM_ISP_HW_CMD_GET_HFR_UPDATE:
 	case CAM_ISP_HW_CMD_STRIPE_UPDATE:
 	case CAM_ISP_HW_CMD_STOP_BUS_ERR_IRQ:
-		CAMSS_DEBUG("VFE_OUT: vfe_bus");
+		CAMSS_DEBUG("VFE_OUT: vfe_bus: %d", cmd_type);
 		rc = core_info->vfe_bus->hw_ops.process_cmd(
 			core_info->vfe_bus->bus_priv, cmd_type, cmd_args,
 			arg_size);
@@ -789,7 +789,7 @@ irqreturn_t cam_vfe_irq(int irq_num, void *data)
 	if (!data)
 		return IRQ_NONE;
 
-	CAMSS_DEBUG();
+	CAMSS_DEBUG("irq_num = %d", irq_num);
 
 	vfe_hw = (struct cam_hw_info *)data;
 	core_info = (struct cam_vfe_hw_core_info *)vfe_hw->core_info;

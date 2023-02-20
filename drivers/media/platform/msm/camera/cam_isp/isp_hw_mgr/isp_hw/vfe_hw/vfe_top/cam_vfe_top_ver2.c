@@ -109,6 +109,10 @@ static int cam_vfe_top_set_hw_clk_rate(
 	CAM_DBG(CAM_ISP, "VFE: Clock name=%s idx=%d clk=%lld",
 		soc_info->clk_name[soc_info->src_clk_idx],
 		soc_info->src_clk_idx, max_clk_rate);
+	
+	CAMSS_DEBUG("VFE: Clock name=%s idx=%d clk_rate=%llu",
+		soc_info->clk_name[soc_info->src_clk_idx],
+		soc_info->src_clk_idx, max_clk_rate);
 
 	rc = cam_soc_util_set_clk_rate(
 		soc_info->clk[soc_info->src_clk_idx],
@@ -259,6 +263,8 @@ static int cam_vfe_top_clock_update(
 
 	hw_info = res->hw_intf->hw_priv;
 
+	CAMSS_DEBUG();
+
 	if (res->res_type != CAM_ISP_RESOURCE_VFE_IN ||
 		res->res_id >= CAM_ISP_HW_VFE_IN_MAX) {
 		CAM_ERR(CAM_ISP, "VFE:%d Invalid res_type:%d res id%d",
@@ -302,6 +308,8 @@ static int cam_vfe_top_bw_update(
 		return -EINVAL;
 
 	hw_info = res->hw_intf->hw_priv;
+
+	CAMSS_DEBUG();
 
 	if (res->res_type != CAM_ISP_RESOURCE_VFE_IN ||
 		res->res_id >= CAM_ISP_HW_VFE_IN_MAX) {
@@ -352,6 +360,8 @@ static int cam_vfe_top_bw_control(
 
 	hw_info = res->hw_intf->hw_priv;
 
+	CAMSS_DEBUG();
+
 	if (res->res_type != CAM_ISP_RESOURCE_VFE_IN ||
 		res->res_id >= CAM_ISP_HW_VFE_IN_MAX) {
 		CAM_ERR(CAM_ISP, "VFE:%d Invalid res_type:%d res id%d",
@@ -385,6 +395,8 @@ static int cam_vfe_top_mux_get_reg_update(
 {
 	struct cam_isp_hw_get_cmd_update  *cmd_update = cmd_args;
 
+	CAMSS_DEBUG();
+
 	if (cmd_update->res->process_cmd)
 		return cmd_update->res->process_cmd(cmd_update->res,
 			CAM_ISP_HW_CMD_GET_REG_UPDATE, cmd_args, arg_size);
@@ -413,6 +425,8 @@ int cam_vfe_top_reset(void *device_priv,
 	uint32_t *reset_reg_args = reset_core_args;
 	uint32_t reset_reg_val;
 
+	CAMSS_DEBUG();
+
 	if (!top_priv || !reset_reg_args) {
 		CAM_ERR(CAM_ISP, "Invalid arguments");
 		return -EINVAL;
@@ -420,9 +434,11 @@ int cam_vfe_top_reset(void *device_priv,
 
 	switch (*reset_reg_args) {
 	case CAM_VFE_HW_RESET_HW_AND_REG:
+		CAMSS_DEBUG("CAM_VFE_HW_RESET_HW_AND_REG_VAL");
 		reset_reg_val = CAM_VFE_HW_RESET_HW_AND_REG_VAL;
 		break;
 	default:
+		CAMSS_DEBUG("CAM_VFE_HW_RESET_HW_VAL");
 		reset_reg_val = CAM_VFE_HW_RESET_HW_VAL;
 		break;
 	}
@@ -432,13 +448,15 @@ int cam_vfe_top_reset(void *device_priv,
 	reg_common = top_priv->common_data.common_reg;
 
 	/* Mask All the IRQs except RESET */
-	cam_io_w_mb((1 << 31),
-		CAM_SOC_GET_REG_MAP_START(soc_info, VFE_CORE_BASE_IDX) + 0x5C);
+	cam_io_w_mb_debug(CAM_SOC_GET_REG_MAP_START(soc_info, VFE_CORE_BASE_IDX), (1 << 31),
+		CAM_SOC_GET_REG_MAP_START(soc_info, VFE_CORE_BASE_IDX) + 0x5C,
+		"0x5C <- (1 << 31)");
 
 	/* Reset HW */
-	cam_io_w_mb(reset_reg_val,
+	cam_io_w_mb_debug(CAM_SOC_GET_REG_MAP_START(soc_info, VFE_CORE_BASE_IDX), reset_reg_val,
 		CAM_SOC_GET_REG_MAP_START(soc_info, VFE_CORE_BASE_IDX) +
-		reg_common->global_reset_cmd);
+		reg_common->global_reset_cmd,
+		"reg_common->global_reset_cmd");
 
 	CAM_DBG(CAM_ISP, "Reset HW exit");
 	return 0;
@@ -462,6 +480,7 @@ int cam_vfe_top_reserve(void *device_priv,
 	args = (struct cam_vfe_acquire_args *)reserve_args;
 	acquire_args = &args->vfe_in;
 
+	CAMSS_DEBUG();
 
 	for (i = 0; i < CAM_VFE_TOP_VER2_MUX_MAX; i++) {
 		if (top_priv->mux_rsrc[i].res_id ==  acquire_args->res_id &&
@@ -506,6 +525,8 @@ int cam_vfe_top_release(void *device_priv,
 	top_priv = (struct cam_vfe_top_ver2_priv   *)device_priv;
 	mux_res = (struct cam_isp_resource_node *)release_args;
 
+	CAMSS_DEBUG();
+
 	CAM_DBG(CAM_ISP, "Resource in state %d", mux_res->res_state);
 	if (mux_res->res_state < CAM_ISP_RESOURCE_STATE_RESERVED) {
 		CAM_ERR(CAM_ISP, "Error! Resource in Invalid res_state :%d",
@@ -529,6 +550,8 @@ int cam_vfe_top_start(void *device_priv,
 		CAM_ERR(CAM_ISP, "Error! Invalid input arguments");
 		return -EINVAL;
 	}
+
+	CAMSS_DEBUG();
 
 	top_priv = (struct cam_vfe_top_ver2_priv *)device_priv;
 	mux_res = (struct cam_isp_resource_node *)start_args;
@@ -576,6 +599,8 @@ int cam_vfe_top_stop(void *device_priv,
 		CAM_ERR(CAM_ISP, "Error! Invalid input arguments");
 		return -EINVAL;
 	}
+
+	CAMSS_DEBUG();
 
 	top_priv = (struct cam_vfe_top_ver2_priv   *)device_priv;
 	mux_res = (struct cam_isp_resource_node *)stop_args;
@@ -653,24 +678,30 @@ int cam_vfe_top_process_cmd(void *device_priv, uint32_t cmd_type,
 
 	switch (cmd_type) {
 	case CAM_ISP_HW_CMD_GET_CHANGE_BASE:
+		CAMSS_DEBUG("CAM_ISP_HW_CMD_GET_CHANGE_BASE");
 		rc = cam_vfe_top_mux_get_base(top_priv, cmd_args, arg_size);
 		break;
 	case CAM_ISP_HW_CMD_GET_REG_UPDATE:
+		CAMSS_DEBUG("CAM_ISP_HW_CMD_GET_REG_UPDATE");
 		rc = cam_vfe_top_mux_get_reg_update(top_priv, cmd_args,
 			arg_size);
 		break;
 	case CAM_ISP_HW_CMD_CLOCK_UPDATE:
+		CAMSS_DEBUG("CAM_ISP_HW_CMD_CLOCK_UPDATE");
 		rc = cam_vfe_top_clock_update(top_priv, cmd_args,
 			arg_size);
 		break;
 	case CAM_ISP_HW_CMD_BW_UPDATE:
+		CAMSS_DEBUG("CAM_ISP_HW_CMD_BW_UPDATE");
 		rc = cam_vfe_top_bw_update(top_priv, cmd_args,
 			arg_size);
 		break;
 	case CAM_ISP_HW_CMD_BW_CONTROL:
+		CAMSS_DEBUG("CAM_ISP_HW_CMD_BW_CONTROL");
 		rc = cam_vfe_top_bw_control(top_priv, cmd_args, arg_size);
 		break;
 	default:
+		CAMSS_DEBUG("default");
 		rc = -EINVAL;
 		CAM_ERR(CAM_ISP, "Error! Invalid cmd:%d", cmd_type);
 		break;
@@ -711,6 +742,8 @@ int cam_vfe_top_ver2_init(
 	top_priv->applied_axi_vote.compressed_bw = 0;
 	top_priv->applied_axi_vote.uncompressed_bw = 0;
 	top_priv->counter_to_update_axi_vote = 0;
+
+	CAMSS_DEBUG();
 
 	for (i = 0, j = 0; i < CAM_VFE_TOP_VER2_MUX_MAX; i++) {
 		top_priv->mux_rsrc[i].res_type = CAM_ISP_RESOURCE_VFE_IN;
@@ -788,6 +821,8 @@ int cam_vfe_top_ver2_deinit(struct cam_vfe_top  **vfe_top_ptr)
 	int i, rc = 0;
 	struct cam_vfe_top_ver2_priv           *top_priv = NULL;
 	struct cam_vfe_top                     *vfe_top;
+
+	CAMSS_DEBUG();
 
 	if (!vfe_top_ptr) {
 		CAM_ERR(CAM_ISP, "Error! Invalid input");

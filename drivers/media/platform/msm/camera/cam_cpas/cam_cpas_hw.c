@@ -530,11 +530,11 @@ static int cam_cpas_hw_reg_read(struct cam_hw_info *cpas_hw,
 	}
 
 	if (mb)
-		reg_value = cam_io_r_mb(
-			soc_info->reg_map[reg_base_index].mem_base + offset);
+		reg_value = cam_io_r_mb_debug(soc_info->reg_map[reg_base_index].mem_base,
+			soc_info->reg_map[reg_base_index].mem_base + offset, "base + offset");
 	else
-		reg_value = cam_io_r(
-			soc_info->reg_map[reg_base_index].mem_base + offset);
+		reg_value = cam_io_r_debug(soc_info->reg_map[reg_base_index].mem_base,
+			soc_info->reg_map[reg_base_index].mem_base + offset, "base + offset");
 
 	*value = reg_value;
 
@@ -586,6 +586,9 @@ static int cam_cpas_util_set_camnoc_axi_clk_rate(
 		clk_rate = required_camnoc_bw / soc_private->camnoc_bus_width;
 
 		CAM_DBG(CAM_CPAS, "Setting camnoc axi clk rate : %llu %d",
+			required_camnoc_bw, clk_rate);
+
+		CAMSS_DEBUG("Setting camnoc axi clk rate : %llu %d",
 			required_camnoc_bw, clk_rate);
 
 		rc = cam_soc_util_set_clk_rate(

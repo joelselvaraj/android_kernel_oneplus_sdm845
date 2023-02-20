@@ -70,6 +70,8 @@ static int cam_vfe_rdi_get_reg_update(
 	CAM_DBG(CAM_ISP, "RDI%d reg_update_cmd %x",
 		rdi_res->res_id - CAM_ISP_HW_VFE_IN_RDI0, reg_val_pair[1]);
 
+	CAMSS_DEBUG("RDI%d | rdi_reg->reg_update_cmd <- reg_data->reg_update_cmd_data | cdm_write_regrandom instead of cam_io_wb | Weird", rdi_res->res_id - CAM_ISP_HW_VFE_IN_RDI0);
+
 	cdm_util_ops->cdm_write_regrandom(cdm_args->cmd.cmd_buf_addr,
 		1, reg_val_pair);
 	cdm_args->cmd.used_bytes = size * 4;
@@ -84,6 +86,8 @@ int cam_vfe_rdi_ver2_acquire_resource(
 	struct cam_vfe_mux_rdi_data   *rdi_data;
 	struct cam_vfe_acquire_args   *acquire_data;
 
+	CAMSS_DEBUG("RDI%d", rdi_res->res_id - CAM_ISP_HW_VFE_IN_RDI0);
+
 	rdi_data     = (struct cam_vfe_mux_rdi_data *)rdi_res->res_priv;
 	acquire_data = (struct cam_vfe_acquire_args *)acquire_param;
 
@@ -97,6 +101,8 @@ static int cam_vfe_rdi_resource_start(
 {
 	struct cam_vfe_mux_rdi_data   *rsrc_data;
 	int                            rc = 0;
+
+	CAMSS_DEBUG("RDI%d", rdi_res->res_id - CAM_ISP_HW_VFE_IN_RDI0);
 
 	if (!rdi_res) {
 		CAM_ERR(CAM_ISP, "Error! Invalid input arguments");
@@ -113,8 +119,9 @@ static int cam_vfe_rdi_resource_start(
 	rdi_res->res_state = CAM_ISP_RESOURCE_STATE_STREAMING;
 
 	/* Reg Update */
-	cam_io_w_mb(rsrc_data->reg_data->reg_update_cmd_data,
-		rsrc_data->mem_base + rsrc_data->rdi_reg->reg_update_cmd);
+	cam_io_w_mb_debug(rsrc_data->mem_base, rsrc_data->reg_data->reg_update_cmd_data,
+		rsrc_data->mem_base + rsrc_data->rdi_reg->reg_update_cmd,
+		"rsrc_data->rdi_reg->reg_update_cmd");
 
 	CAM_DBG(CAM_ISP, "Start RDI %d",
 		rdi_res->res_id - CAM_ISP_HW_VFE_IN_RDI0);
@@ -128,6 +135,7 @@ static int cam_vfe_rdi_resource_stop(
 {
 	struct cam_vfe_mux_rdi_data           *rdi_priv;
 	int rc = 0;
+	CAMSS_DEBUG("RDI%d", rdi_res->res_id - CAM_ISP_HW_VFE_IN_RDI0);
 
 	if (!rdi_res) {
 		CAM_ERR(CAM_ISP, "Error! Invalid input arguments");
@@ -157,12 +165,16 @@ static int cam_vfe_rdi_process_cmd(struct cam_isp_resource_node *rsrc_node,
 		return -EINVAL;
 	}
 
+	CAMSS_DEBUG("RDI%d", rsrc_node->res_id - CAM_ISP_HW_VFE_IN_RDI0);
+
 	switch (cmd_type) {
 	case CAM_ISP_HW_CMD_GET_REG_UPDATE:
+		CAMSS_DEBUG("CAM_ISP_HW_CMD_GET_REG_UPDATE");
 		rc = cam_vfe_rdi_get_reg_update(rsrc_node, cmd_args,
 			arg_size);
 		break;
 	default:
+		CAMSS_DEBUG("default");
 		CAM_ERR(CAM_ISP,
 			"unsupported RDI process command:%d", cmd_type);
 		break;
@@ -196,23 +208,29 @@ static int cam_vfe_rdi_handle_irq_bottom_half(void *handler_priv,
 	payload = evt_payload_priv;
 	irq_status0 = payload->irq_reg_val[CAM_IFE_IRQ_CAMIF_REG_STATUS0];
 
+	CAMSS_DEBUG("RDI%d", rdi_node->res_id - CAM_ISP_HW_VFE_IN_RDI0);
+
 	CAM_DBG(CAM_ISP, "event ID:%d", payload->evt_id);
 	CAM_DBG(CAM_ISP, "irq_status_0 = %x", irq_status0);
+	CAMSS_DEBUG("irq_status_0 = %x", irq_status0);
 
 	switch (payload->evt_id) {
 	case CAM_ISP_HW_EVENT_SOF:
 		if (irq_status0 & rdi_priv->reg_data->sof_irq_mask) {
+			CAMSS_DEBUG("CAM_ISP_HW_EVENT_SOF");
 			CAM_DBG(CAM_ISP, "Received SOF");
 			ret = CAM_VFE_IRQ_STATUS_SUCCESS;
 		}
 		break;
 	case CAM_ISP_HW_EVENT_REG_UPDATE:
 		if (irq_status0 & rdi_priv->reg_data->reg_update_irq_mask) {
+			CAMSS_DEBUG("CAM_ISP_HW_EVENT_REG_UPDATE");
 			CAM_DBG(CAM_ISP, "Received REG UPDATE");
 			ret = CAM_VFE_IRQ_STATUS_SUCCESS;
 		}
 		break;
 	default:
+		CAMSS_DEBUG("default");
 		break;
 	}
 
@@ -245,15 +263,19 @@ int cam_vfe_rdi_ver2_init(
 
 	switch (rdi_node->res_id) {
 	case CAM_ISP_HW_VFE_IN_RDI0:
+		CAMSS_DEBUG("CAM_ISP_HW_VFE_IN_RDI0");
 		rdi_priv->reg_data = rdi_info->reg_data[0];
 		break;
 	case CAM_ISP_HW_VFE_IN_RDI1:
+		CAMSS_DEBUG("CAM_ISP_HW_VFE_IN_RDI1");
 		rdi_priv->reg_data = rdi_info->reg_data[1];
 		break;
 	case CAM_ISP_HW_VFE_IN_RDI2:
+		CAMSS_DEBUG("CAM_ISP_HW_VFE_IN_RDI2");
 		rdi_priv->reg_data = rdi_info->reg_data[2];
 		break;
 	case CAM_ISP_HW_VFE_IN_RDI3:
+		CAMSS_DEBUG("CAM_ISP_HW_VFE_IN_RDI3");
 		if (rdi_info->reg_data[3]) {
 			rdi_priv->reg_data = rdi_info->reg_data[3];
 		} else {
@@ -262,6 +284,7 @@ int cam_vfe_rdi_ver2_init(
 		}
 		break;
 	default:
+		CAMSS_DEBUG("default");
 		CAM_DBG(CAM_ISP, "invalid Resource id:%d", rdi_node->res_id);
 		goto err_init;
 	}
@@ -282,6 +305,8 @@ int cam_vfe_rdi_ver2_deinit(
 	struct cam_isp_resource_node  *rdi_node)
 {
 	struct cam_vfe_mux_rdi_data *rdi_priv = rdi_node->res_priv;
+
+	CAMSS_DEBUG("RDI%d", rdi_node->res_id - CAM_ISP_HW_VFE_IN_RDI0);
 
 	rdi_node->start = NULL;
 	rdi_node->stop  = NULL;

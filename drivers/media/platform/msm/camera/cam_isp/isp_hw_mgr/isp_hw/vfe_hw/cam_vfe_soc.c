@@ -23,6 +23,8 @@ static bool cam_vfe_cpas_cb(uint32_t client_handle, void *userdata,
 	if (!irq_data)
 		return error_handled;
 
+	CAMSS_DEBUG("irq_data->irq_type = %d", irq_data->irq_type);
+
 	switch (irq_data->irq_type) {
 	case CAM_CAMNOC_IRQ_IFE02_UBWC_ENCODE_ERROR:
 	case CAM_CAMNOC_IRQ_IFE13_UBWC_ENCODE_ERROR:
@@ -94,6 +96,8 @@ int cam_vfe_init_soc_resources(struct cam_hw_soc_info *soc_info,
 	}
 	soc_info->soc_private = soc_private;
 
+	CAMSS_DEBUG();
+
 	rc = cam_vfe_get_dt_properties(soc_info);
 	if (rc < 0) {
 		CAM_ERR(CAM_ISP, "Error! Get DT properties failed rc=%d", rc);
@@ -149,6 +153,8 @@ int cam_vfe_deinit_soc_resources(struct cam_hw_soc_info *soc_info)
 		return -ENODEV;
 	}
 
+	CAMSS_DEBUG();
+
 	soc_private = soc_info->soc_private;
 	if (!soc_private) {
 		CAM_ERR(CAM_ISP, "Error! soc_private NULL");
@@ -186,6 +192,8 @@ int cam_vfe_enable_soc_resources(struct cam_hw_soc_info *soc_info)
 		rc = -EINVAL;
 		goto end;
 	}
+
+	CAMSS_DEBUG();
 	soc_private = soc_info->soc_private;
 
 	ahb_vote.type       = CAM_VOTE_ABSOLUTE;
@@ -229,6 +237,8 @@ int cam_vfe_soc_enable_clk(struct cam_hw_soc_info *soc_info,
 	}
 	soc_private = soc_info->soc_private;
 
+	CAMSS_DEBUG();
+
 	if (strcmp(clk_name, CAM_VFE_DSP_CLK_NAME) == 0) {
 		rc = cam_soc_util_clk_enable(soc_private->dsp_clk,
 			CAM_VFE_DSP_CLK_NAME, soc_private->dsp_clk_rate);
@@ -253,6 +263,8 @@ int cam_vfe_soc_disable_clk(struct cam_hw_soc_info *soc_info,
 	}
 	soc_private = soc_info->soc_private;
 
+	CAMSS_DEBUG();
+
 	if (strcmp(clk_name, CAM_VFE_DSP_CLK_NAME) == 0) {
 		rc = cam_soc_util_clk_disable(soc_private->dsp_clk,
 			CAM_VFE_DSP_CLK_NAME);
@@ -276,6 +288,8 @@ int cam_vfe_disable_soc_resources(struct cam_hw_soc_info *soc_info)
 		return rc;
 	}
 	soc_private = soc_info->soc_private;
+
+	CAMSS_DEBUG();
 
 	rc = cam_soc_util_disable_platform_resource(soc_info, true, true);
 	if (rc) {
