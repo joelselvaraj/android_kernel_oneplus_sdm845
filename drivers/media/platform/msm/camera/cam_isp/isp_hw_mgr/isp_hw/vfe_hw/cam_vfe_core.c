@@ -601,7 +601,7 @@ int cam_vfe_start(void *hw_priv, void *start_args, uint32_t arg_size)
 	if (isp_res->res_type == CAM_ISP_RESOURCE_VFE_IN) {
 		CAMSS_DEBUG("VFE_IN: vfe_top");
 		if (isp_res->res_id == CAM_ISP_HW_VFE_IN_CAMIF) {
-			CAMSS_DEBUG("cam_irq_controller_subscribe_irq | camif_irq_reg_mask | isp_res->irq_handle | top & bottom handler");
+			CAMSS_DEBUG("cam_irq_controller_subscribe_irq | camif_irq_reg_mask | isp_res->irq_handle | top & bottom handler | CAM_ISP_HW_VFE_IN_CAMIF");
 			isp_res->irq_handle =
 				cam_irq_controller_subscribe_irq(
 					core_info->vfe_irq_controller,
@@ -615,7 +615,7 @@ int cam_vfe_start(void *hw_priv, void *start_args, uint32_t arg_size)
 			if (isp_res->irq_handle < 1)
 				rc = -ENOMEM;
 		} else if (isp_res->rdi_only_ctx) {
-			CAMSS_DEBUG("cam_irq_controller_subscribe_irq | rdi_irq_reg_mask | isp_res->irq_handle | top & bottom handler");
+			CAMSS_DEBUG("cam_irq_controller_subscribe_irq | rdi_irq_reg_mask | isp_res->irq_handle | top & bottom handler | rdi_only_ctx");
 			isp_res->irq_handle =
 				cam_irq_controller_subscribe_irq(
 					core_info->vfe_irq_controller,

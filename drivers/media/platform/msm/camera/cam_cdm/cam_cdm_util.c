@@ -239,7 +239,9 @@ uint32_t *cdm_write_regrandom(uint32_t *pCmdBuffer, uint32_t numRegVals,
 	dst = pCmdBuffer;
 	src = pRegVals;
 	for (i = 0; i < numRegVals; i++) {
+		CAMSS_DEBUG("addr = 0x%x, val = 0x%x", &dst, &src);
 		*dst++ = *src++;
+		CAMSS_DEBUG("addr = 0x%x, val = 0x%x", &dst, &src);
 		*dst++ = *src++;
 	}
 
